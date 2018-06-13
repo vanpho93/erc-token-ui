@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import { Container } from 'semantic-ui-react'
-import { TransferToken } from './screens/TransferToken';
+import { AccountManager } from './screens/AccountManager';
 
 class App extends Component {
   render() {
     return (
       <Container>
-        <TransferToken />
+        <AccountManager />
       </Container>
     );
   }

@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { Container, Input, Divider, Button, Card, Form, Modal, Icon, Header } from 'semantic-ui-react';
-import { web3 } from '../web3';
+import { web3, tokenContract } from '../web3';
 
 export class TransferToken extends Component {
-    state = { openModel: false, currentAccount: null, to: '', amount: null };
+    state = { openModel: false, currentAccount: null, to: '', amount: '', waiting: false };
 
     async componentDidMount() {
         const accounts = await web3.eth.getAccounts();
@@ -15,12 +15,22 @@ export class TransferToken extends Component {
         this.setState({ openModel: true });
     }
 
-    sendToken() {
-
+    sendToken = async () => {
+        try {
+            this.setState({ waiting: true });
+            const { currentAccount, to, amount } = this.state;
+            await tokenContract.methods.transfer(to, amount).send({ from: currentAccount });
+            alert('Token sent!');
+        } catch (error) {
+            console.log('ERROR', error);
+            alert('Cannot send token');
+        } finally {
+            this.setState({ to: '', amount: '', waiting: false, openModel: false });
+        }
     }
 
     render() {
-        const { to, amount } = this.state;
+        const { to, amount, waiting } = this.state;
         return (
             <Container>
                 <Card fluid>
@@ -42,7 +52,7 @@ export class TransferToken extends Component {
                                     type="number"
                                     label="amount:"
                                     value={amount}
-                                    onChange={evt => this.setState({ to: evt.target.value })}
+                                    onChange={evt => this.setState({ amount: evt.target.value })}
                                     placeholder="999999.99"
                                     fluid
                                 />
@@ -52,12 +62,15 @@ export class TransferToken extends Component {
                         </Card.Description>
                     </Card.Content>
                     <Modal open={this.state.openModel}>
-                        <Header icon='browser' content='Cookies policy' />
+                        <Header icon='browser' content='Are you sure to send token?' />
                         <Modal.Content>
-                            <h3>This website uses cookies to ensure the best user experience.</h3>
+                            <h3>Once you click send token, it's cannot be redo, check once again before click.</h3>
                         </Modal.Content>
                         <Modal.Actions>
-                            <Button color='green' onClick={() => this.setState({ openModel: false })} loading>
+                            <Button color='grey' onClick={() => this.setState({ openModel: false })}>
+                                <Icon name='cancel' /> Cancel
+                            </Button>
+                            <Button color='green' onClick={this.sendToken} loading={waiting}>
                                 <Icon name='checkmark' /> Send token
                             </Button>
                         </Modal.Actions>

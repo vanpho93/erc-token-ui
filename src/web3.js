@@ -13,7 +13,7 @@ if (typeof window !== 'undefined' && typeof window.web3 !== 'undefined') {
 	web3 = new Web3(provider);
 }
 
-const address = '0xe7d704932f5d619968a6dfaad92eb04f01c7ea77';
+const address = '0x9c9857df60fb86e1fa7d873fd38653dc69b246cb';
 
 const abi = [
 	{

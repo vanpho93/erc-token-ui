@@ -3,11 +3,18 @@ import { Container, Input, Divider, Button, Card, Form, Modal, Icon, Header } fr
 import { web3, tokenContract } from '../web3';
 
 export class TransferToken extends Component {
-    state = { openModel: false, currentAccount: null, to: '', amount: '', waiting: false };
+    state = { openModel: false, currentAccount: null, to: '', amount: '', waiting: false, tokenAmount: 0 };
 
     async componentDidMount() {
         const accounts = await web3.eth.getAccounts();
-        this.setState({ currentAccount: accounts[0] });
+        this.setState({ currentAccount: accounts[0] }, () => {
+            this.updateAmount();
+        });
+    }
+
+    updateAmount = async () => {
+        const tokenAmount = await tokenContract.methods.balanceOf(this.state.currentAccount).call();
+        this.setState({ tokenAmount });
     }
 
     onSubmit = event => {
@@ -26,13 +33,15 @@ export class TransferToken extends Component {
             alert('Cannot send token');
         } finally {
             this.setState({ to: '', amount: '', waiting: false, openModel: false });
+            this.updateAmount();
         }
     }
 
     render() {
-        const { to, amount, waiting } = this.state;
+        const { to, amount, waiting, tokenAmount } = this.state;
         return (
             <Container>
+                <h3>You have {tokenAmount} PHO now</h3>
                 <Card fluid>
                     <Card.Content>
                         <Card.Header>Transfer token</Card.Header>
